@@ -1,11 +1,11 @@
 {
-  "name": "@kris-hamade/pretty-text",
-  "version": "1.0.0",
+  "name": "text-alchemy",
+  "version": "1.0.1",
   "description": "A comprehensive TypeScript library for text formatting, manipulation, and HTML template generation",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "pretty-text": "dist/cli.js"
+    "text-alchemy": "dist/cli.js"
   },
   "scripts": {
     "build": "tsc",
@@ -27,20 +27,19 @@
     "templates",
     "camelcase",
     "snakecase",
-    "text-processing"
+    "text-processing",
+    "alchemy",
+    "text-alchemy"
   ],
   "author": "kris-hamade <khamade22@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/kris-hamade/pretty-text.git"
+    "url": "https://github.com/kris-hamade/text-alchemy.git"
   },
-  "homepage": "https://github.com/kris-hamade/pretty-text#readme",
+  "homepage": "https://github.com/kris-hamade/text-alchemy#readme",
   "bugs": {
-    "url": "https://github.com/kris-hamade/pretty-text/issues"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "url": "https://github.com/kris-hamade/text-alchemy/issues"
   },
   "devDependencies": {
     "typescript": "^5.0.0",

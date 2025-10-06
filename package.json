@@ -1,7 +1,7 @@
 {
-  "name": "pretty-text",
+  "name": "@kris-hamade/pretty-text",
   "version": "1.0.0",
-  "description": "A simple TypeScript npm module for text formatting",
+  "description": "A comprehensive TypeScript library for text formatting, manipulation, and HTML template generation",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
@@ -18,9 +18,30 @@
     "pretty": "node dist/cli.js",
     "prepublishOnly": "npm run build"
   },
-  "keywords": ["typescript", "text", "formatting"],
-  "author": "",
+  "keywords": [
+    "typescript",
+    "text",
+    "formatting",
+    "cli",
+    "html",
+    "templates",
+    "camelcase",
+    "snakecase",
+    "text-processing"
+  ],
+  "author": "kris-hamade <khamade22@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kris-hamade/pretty-text.git"
+  },
+  "homepage": "https://github.com/kris-hamade/pretty-text#readme",
+  "bugs": {
+    "url": "https://github.com/kris-hamade/pretty-text/issues"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "devDependencies": {
     "typescript": "^5.0.0",
     "@types/node": "^20.0.0",

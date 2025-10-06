@@ -4,7 +4,7 @@
  * CLI interface for pretty-text module
  */
 
-import { formatText, capitalizeWords, truncateText, normalizeText, createHtmlTemplate, createTextBlock, createQuoteBlock } from './index';
+import { formatText, capitalizeWords, truncateText, normalizeText, createEmailTemplate, createFormattedEmailContent } from './index';
 
 interface CliOptions {
   bold?: boolean;
@@ -20,6 +20,15 @@ interface CliOptions {
   title?: string;
   quote?: boolean;
   author?: string;
+  // Email template options
+  subject?: string;
+  recipient?: string;
+  sender?: string;
+  template?: string;
+  greeting?: string;
+  closing?: string;
+  signature?: string;
+  format?: string;
 }
 
 function parseArgs(): { command: string; text: string; options: CliOptions } {
@@ -86,6 +95,38 @@ function parseArgs(): { command: string; text: string; options: CliOptions } {
           options.author = value;
           i++; // Skip the value
           break;
+        case 'subject':
+          options.subject = value;
+          i++; // Skip the value
+          break;
+        case 'recipient':
+          options.recipient = value;
+          i++; // Skip the value
+          break;
+        case 'sender':
+          options.sender = value;
+          i++; // Skip the value
+          break;
+        case 'template':
+          options.template = value;
+          i++; // Skip the value
+          break;
+        case 'greeting':
+          options.greeting = value;
+          i++; // Skip the value
+          break;
+        case 'closing':
+          options.closing = value;
+          i++; // Skip the value
+          break;
+        case 'signature':
+          options.signature = value;
+          i++; // Skip the value
+          break;
+        case 'format':
+          options.format = value;
+          i++; // Skip the value
+          break;
       }
     } else {
       textArgs.push(arg);
@@ -107,6 +148,7 @@ Commands:
   format    Format text with styling options
   html      Generate HTML template
   quote     Create a quote block
+  email     Create an email template
 
 Options:
   --bold              Make text bold
@@ -122,6 +164,16 @@ Options:
   --title <title>     Set HTML title
   --quote             Create quote block
   --author <author>   Set quote author
+  
+  Email Options:
+  --subject <subject>     Set email subject
+  --recipient <email>     Set recipient email
+  --sender <email>        Set sender email
+  --template <type>       Set template type (simple, pretty, professional, casual)
+  --greeting <text>       Set greeting text
+  --closing <text>        Set closing text
+  --signature <text>      Set signature text
+  --format <type>         Set output format (html, text)
 
 Examples:
   pretty-text format "Hello World" --bold --color red
@@ -131,6 +183,7 @@ Examples:
   pretty-text format "very long text" --truncate 20
   pretty-text html "My content" --title "My Page"
   pretty-text quote "Great quote" --author "Author Name"
+  pretty-text email "Hello, this is my message" --subject "Test Email" --template pretty --greeting "Dear Friend"
 `);
 }
 
@@ -158,17 +211,55 @@ function executeCommand(command: string, text: string, options: CliOptions) {
             break;
 
         case 'html':
-            const content = options.quote
-                ? createQuoteBlock(text, options.author)
-                : createTextBlock(text, 'content');
-
-            result = createHtmlTemplate(content, {
-                title: options.title || 'Pretty Text Document'
+            // Use email template for HTML generation with document styling
+            const htmlContent = createFormattedEmailContent(text, {
+                greeting: options.quote ? undefined : 'Document',
+                closing: options.quote ? options.author : undefined,
+                signature: options.quote ? undefined : 'Generated with Text Alchemy',
+                bold: options.bold,
+                italic: options.italic,
+                color: options.color
+            });
+            
+            result = createEmailTemplate(htmlContent, {
+                subject: options.title || 'Pretty Text Document',
+                template: 'professional', // Use professional template for documents
+                format: 'html'
             });
             break;
 
         case 'quote':
-            result = createQuoteBlock(text, options.author);
+            // Use email template for quote generation
+            const quoteContent = createFormattedEmailContent(text, {
+                greeting: 'Quote',
+                closing: options.author,
+                signature: 'Generated with Text Alchemy'
+            });
+            
+            result = createEmailTemplate(quoteContent, {
+                subject: 'Quote',
+                template: 'pretty',
+                format: 'html'
+            });
+            break;
+
+        case 'email':
+            const emailContent = createFormattedEmailContent(text, {
+                greeting: options.greeting,
+                closing: options.closing,
+                signature: options.signature,
+                bold: options.bold,
+                italic: options.italic,
+                color: options.color
+            });
+            
+            result = createEmailTemplate(emailContent, {
+                subject: options.subject,
+                recipient: options.recipient,
+                sender: options.sender,
+                template: options.template as any,
+                format: options.format as any
+            });
             break;
 
         default:

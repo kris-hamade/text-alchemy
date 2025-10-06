@@ -6,9 +6,8 @@ const {
   capitalizeWords,
   truncateText,
   normalizeText,
-  createHtmlTemplate,
-  createTextBlock,
-  createQuoteBlock
+  createEmailTemplate,
+  createFormattedEmailContent
 } = require('./dist/index.js');
 
 console.log('🧪 Testing pretty-text module...\n');
@@ -42,18 +41,76 @@ const messyText = '  This   text   has   \n  \n  extra   spaces   \n  and   \n  
 console.log('Original:', JSON.stringify(messyText));
 console.log('Normalized:', JSON.stringify(normalizeText(messyText)));
 
-console.log('\n🌐 Testing HTML Templates:');
+console.log('\n🌐 Testing HTML Templates (using email templates):');
 console.log('Creating HTML template...');
-const htmlContent = createHtmlTemplate(`
-  <h1>Welcome to Pretty Text</h1>
-  ${createTextBlock('This is a formatted text block with some content.', 'highlight')}
-  ${createQuoteBlock('The best way to predict the future is to create it.', 'Peter Drucker')}
-`, {
-  title: 'Pretty Text Demo',
-  bodyClass: 'demo-page'
-});
+
+// Test HTML document generation using email template
+const htmlContent = createEmailTemplate(
+  createFormattedEmailContent(`
+    <h1>Welcome to Pretty Text</h1>
+    <p>This is a formatted text block with some content.</p>
+    <blockquote>
+      <p>The best way to predict the future is to create it.</p>
+      <cite>— Peter Drucker</cite>
+    </blockquote>
+  `, {
+    greeting: 'Document',
+    signature: 'Generated with Text Alchemy'
+  }),
+  {
+    subject: 'Pretty Text Demo',
+    template: 'professional',
+    format: 'html'
+  }
+);
 
 console.log('HTML Template created successfully!');
 console.log('Template length:', htmlContent.length, 'characters');
+
+console.log('\n📧 Testing Email Templates:');
+console.log('Creating email template...');
+
+// Test basic email template
+const emailContent = createFormattedEmailContent('Hello, this is a test email message!', {
+  greeting: 'Dear Friend',
+  closing: 'Best regards',
+  signature: 'John Doe',
+  bold: true,
+  color: 'blue'
+});
+
+const emailTemplate = createEmailTemplate(emailContent, {
+  subject: 'Test Email',
+  recipient: 'friend@example.com',
+  sender: 'john@example.com',
+  template: 'pretty'
+});
+
+console.log('Email template created successfully!');
+console.log('Email template length:', emailTemplate.length, 'characters');
+
+// Test different email templates
+console.log('\n📧 Testing different email templates:');
+const templates = ['simple', 'pretty', 'professional', 'casual'];
+
+templates.forEach(template => {
+  const testEmail = createEmailTemplate(
+    createFormattedEmailContent('Testing template', { greeting: 'Hi' }),
+    { subject: 'Test', template: template }
+  );
+  // Check for template-specific CSS instead of template name
+  const hasTemplateStyle = template === 'simple' ? testEmail.includes('#007bff') :
+                          template === 'pretty' ? testEmail.includes('#667eea') :
+                          template === 'professional' ? testEmail.includes('#2c3e50') :
+                          template === 'casual' ? testEmail.includes('#ff6b6b') : false;
+  console.log(`${template} template:`, hasTemplateStyle ? '✅' : '❌');
+});
+
+// Test text format email
+const textEmail = createEmailTemplate(
+  createFormattedEmailContent('Plain text email'),
+  { subject: 'Text Email', format: 'text' }
+);
+console.log('Text email format:', textEmail.includes('Subject:') ? '✅' : '❌');
 
 console.log('\n✅ All tests completed!');

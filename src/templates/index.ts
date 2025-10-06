@@ -2,4 +2,4 @@
  * Templates module exports
  */
 
-export * from "./html-template";
+export * from "./email-template";

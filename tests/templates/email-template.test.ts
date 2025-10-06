@@ -134,9 +134,10 @@ describe('Email Template', () => {
       const template = createEmailTemplate(minimalContent);
       
       expect(template).toContain('Just the message');
-      expect(template).not.toContain('greeting');
-      expect(template).not.toContain('closing');
-      expect(template).not.toContain('signature');
+      // Check that greeting, closing, and signature sections are not rendered when not provided
+      expect(template).not.toContain('<p class="greeting">');
+      expect(template).not.toContain('<p class="closing">');
+      expect(template).not.toContain('<p class="signature">');
     });
 
     it('should include proper CSS styling', () => {

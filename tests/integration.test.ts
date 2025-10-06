@@ -1,4 +1,4 @@
-import { formatText, capitalizeWords, truncateText, normalizeText, createHtmlTemplate, createTextBlock, createQuoteBlock } from '../src/index';
+import { formatText, capitalizeWords, truncateText, normalizeText, createEmailTemplate, createFormattedEmailContent } from '../src/index';
 
 describe('Integration Tests', () => {
   describe('Module Integration', () => {
@@ -10,9 +10,8 @@ describe('Integration Tests', () => {
     });
 
     it('should export all templates from main index', () => {
-      expect(typeof createHtmlTemplate).toBe('function');
-      expect(typeof createTextBlock).toBe('function');
-      expect(typeof createQuoteBlock).toBe('function');
+      expect(typeof createEmailTemplate).toBe('function');
+      expect(typeof createFormattedEmailContent).toBe('function');
     });
   });
 
@@ -23,13 +22,19 @@ describe('Integration Tests', () => {
       expect(formatted).toBe('helloWorldFromTypescript');
     });
 
-    it('should create a complete HTML document', () => {
-      const content = createTextBlock('Welcome to our site!', 'welcome');
-      const html = createHtmlTemplate(content, { title: 'Welcome Page' });
+    it('should create a complete HTML document using email template', () => {
+      const content = createFormattedEmailContent('Welcome to our site!', {
+        greeting: 'Welcome',
+        signature: 'Site Team'
+      });
+      const html = createEmailTemplate(content, { 
+        subject: 'Welcome Page',
+        template: 'professional'
+      });
       
       expect(html).toContain('<!DOCTYPE html>');
       expect(html).toContain('<title>Welcome Page</title>');
-      expect(html).toContain('<div class="welcome">Welcome to our site!</div>');
+      expect(html).toContain('Welcome to our site!');
     });
 
     it('should process a long text with multiple operations', () => {
@@ -43,13 +48,19 @@ describe('Integration Tests', () => {
       expect(truncated).toBe('This Is A Very Lo...');
     });
 
-    it('should create a quote with proper formatting', () => {
-      const quote = createQuoteBlock('The best way to predict the future is to create it.', 'Peter Drucker');
-      const html = createHtmlTemplate(quote, { title: 'Inspirational Quotes' });
+    it('should create a quote with proper formatting using email template', () => {
+      const quoteContent = createFormattedEmailContent('The best way to predict the future is to create it.', {
+        greeting: 'Quote',
+        closing: 'Peter Drucker',
+        signature: 'Inspirational Quotes'
+      });
+      const html = createEmailTemplate(quoteContent, { 
+        subject: 'Inspirational Quotes',
+        template: 'pretty'
+      });
       
-      expect(html).toContain('<blockquote class="highlight">');
-      expect(html).toContain('<p>The best way to predict the future is to create it.</p>');
-      expect(html).toContain('<cite>— Peter Drucker</cite>');
+      expect(html).toContain('The best way to predict the future is to create it.');
+      expect(html).toContain('Peter Drucker');
     });
 
     it('should handle variable name generation', () => {

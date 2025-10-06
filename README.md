@@ -1,17 +1,18 @@
-# Pretty Text
+# Text Alchemy
 
-[![CI](https://github.com/yourusername/pretty-text/workflows/CI/badge.svg)](https://github.com/yourusername/pretty-text/actions)
-[![npm version](https://badge.fury.io/js/pretty-text.svg)](https://badge.fury.io/js/pretty-text)
-[![Coverage Status](https://codecov.io/gh/yourusername/pretty-text/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/pretty-text)
+[![CI](https://github.com/kris-hamade/text-alchemy/workflows/CI/badge.svg)](https://github.com/kris-hamade/text-alchemy/actions)
+[![npm version](https://badge.fury.io/js/text-alchemy.svg)](https://badge.fury.io/js/text-alchemy)
+[![Coverage Status](https://codecov.io/gh/kris-hamade/text-alchemy/branch/main/graph/badge.svg)](https://codecov.io/gh/kris-hamade/text-alchemy)
 
-A comprehensive TypeScript library for text formatting, manipulation, and HTML template generation. Perfect for CLI tools, web applications, and any project that needs advanced text processing capabilities.
+A comprehensive TypeScript library for text formatting, manipulation, and email template generation. Perfect for CLI tools, web applications, and any project that needs advanced text processing capabilities with beautiful email templates.
 
 ## ✨ Features
 
 - 🎨 **Text Formatting**: Bold, italic, underline, and colored text
 - 🔄 **Case Conversion**: camelCase, snake_case, and proper capitalization
 - ✂️ **Text Manipulation**: Truncation, normalization, and whitespace handling
-- 🌐 **HTML Templates**: Generate complete HTML documents with custom styling
+- 📧 **Email Templates**: Generate beautiful HTML emails with multiple template styles
+- 🌐 **HTML Documents**: Create professional HTML documents using email templates
 - 🖥️ **CLI Interface**: Command-line tool for quick text processing
 - 📦 **TypeScript**: Full type safety and IntelliSense support
 - 🧪 **Well Tested**: Comprehensive test suite with Jest
@@ -19,7 +20,7 @@ A comprehensive TypeScript library for text formatting, manipulation, and HTML t
 ## 📦 Installation
 
 ```bash
-npm install pretty-text
+npm install text-alchemy
 ```
 
 ## 🚀 Quick Start
@@ -27,7 +28,7 @@ npm install pretty-text
 ### Basic Usage
 
 ```typescript
-import { formatText, capitalizeWords, truncateText, normalizeText } from 'pretty-text';
+import { formatText, capitalizeWords, truncateText, normalizeText } from 'text-alchemy';
 
 // Text formatting
 const boldText = formatText('Hello World', { bold: true });
@@ -54,19 +55,45 @@ const normalized = normalizeText('  messy   text  ');
 // Result: "messy text"
 ```
 
-### HTML Templates
+### Email Templates
 
 ```typescript
-import { createHtmlTemplate, createTextBlock, createQuoteBlock } from 'pretty-text';
+import { createEmailTemplate, createFormattedEmailContent } from 'text-alchemy';
 
-// Create a complete HTML document
-const html = createHtmlTemplate(`
+// Create a beautiful email template
+const emailContent = createFormattedEmailContent('Hello, this is my message!', {
+  greeting: 'Dear Friend',
+  closing: 'Best regards',
+  signature: 'John Doe',
+  bold: true,
+  color: 'blue'
+});
+
+const email = createEmailTemplate(emailContent, {
+  subject: 'Test Email',
+  recipient: 'friend@example.com',
+  sender: 'john@example.com',
+  template: 'pretty' // simple, pretty, professional, casual
+});
+```
+
+### HTML Documents (using email templates)
+
+```typescript
+import { createEmailTemplate, createFormattedEmailContent } from 'text-alchemy';
+
+// Create HTML documents using email templates
+const documentContent = createFormattedEmailContent(`
   <h1>Welcome to My Site</h1>
-  ${createTextBlock('This is a formatted text block.', 'highlight')}
-  ${createQuoteBlock('The best way to predict the future is to create it.', 'Peter Drucker')}
+  <p>This is a formatted document with professional styling.</p>
 `, {
-  title: 'My Website',
-  bodyClass: 'homepage'
+  greeting: 'Document',
+  signature: 'Generated with Text Alchemy'
+});
+
+const html = createEmailTemplate(documentContent, {
+  subject: 'My Website',
+  template: 'professional'
 });
 ```
 
@@ -82,11 +109,23 @@ node dist/cli.js format "hello world from typescript" --camel
 # Convert to snake_case
 node dist/cli.js format "hello world from typescript" --snake
 
-# Generate HTML template
-node dist/cli.js html "My content" --title "My Page"
+# Generate HTML document (using email templates)
+node dist/cli.js html "My content" --title "My Page" --bold
 
-# Create quote block
-node dist/cli.js quote "Great quote" --author "Author Name"
+# Create quote (using email templates)
+node dist/cli.js quote "Great quote" --author "Author Name" --italic
+
+# Create email templates
+node dist/cli.js email "Hello, this is my message" --subject "Test Email" --template pretty --greeting "Dear Friend" --closing "Best regards" --signature "John Doe"
+
+# Professional email
+node dist/cli.js email "Project update" --subject "Project Status" --template professional --greeting "Dear Team" --closing "Best regards" --signature "Project Manager" --bold
+
+# Casual email with formatting
+node dist/cli.js email "Hey there!" --subject "Quick Update" --template casual --greeting "Hi Friend!" --closing "Talk soon!" --bold --color blue
+
+# Text format email
+node dist/cli.js email "Simple message" --subject "Text Email" --format text --greeting "Hi" --closing "Bye"
 ```
 
 ## 📚 API Reference
@@ -116,16 +155,35 @@ Truncates text to specified length with optional suffix.
 #### `normalizeText(text: string): string`
 Removes extra whitespace and normalizes line breaks.
 
-### HTML Templates
+### Email Templates
 
-#### `createHtmlTemplate(content: string, options?: HtmlTemplateOptions): string`
-Creates a complete HTML document with custom styling.
+#### `createEmailTemplate(content: EmailContent, options?: EmailTemplateOptions): string`
+Creates a beautiful HTML email template with multiple styling options.
 
-#### `createTextBlock(text: string, className?: string): string`
-Creates a styled text block with CSS class.
+**Template Options:**
+- `subject?: string` - Email subject line
+- `recipient?: string` - Recipient email address
+- `sender?: string` - Sender email address
+- `template?: 'simple' | 'pretty' | 'professional' | 'casual'` - Template style
+- `format?: 'html' | 'text'` - Output format
 
-#### `createQuoteBlock(quote: string, author?: string): string`
-Creates a highlighted quote block with optional author attribution.
+#### `createFormattedEmailContent(text: string, options?: FormattingOptions): EmailContent`
+Creates formatted email content with styling options.
+
+**Content Options:**
+- `greeting?: string` - Opening greeting
+- `closing?: string` - Closing message
+- `signature?: string` - Signature text
+- `bold?: boolean` - Make text bold
+- `italic?: boolean` - Make text italic
+- `color?: string` - Set text color
+
+### Available Templates
+
+- **`simple`** - Clean blue header, minimal styling
+- **`pretty`** - Gradient purple header (default), elegant design
+- **`professional`** - Dark professional look, business-ready
+- **`casual`** - Colorful gradient header, friendly design
 
 ## 🛠️ Development
 
@@ -133,8 +191,8 @@ Creates a highlighted quote block with optional author attribution.
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/pretty-text.git
-cd pretty-text
+git clone https://github.com/kris-hamade/text-alchemy.git
+cd text-alchemy
 
 # Install dependencies
 npm install
@@ -186,20 +244,34 @@ npm run test:watch
 ### Commands
 
 - `format` - Format text with styling options
-- `html` - Generate HTML template
-- `quote` - Create quote block
+- `html` - Generate HTML document (using email templates)
+- `quote` - Create quote (using email templates)
+- `email` - Create email templates
 
 ### Options
 
+**Text Formatting:**
 - `--bold` - Make text bold
 - `--italic` - Make text italic
 - `--underline` - Make text underlined
-- `--color <color>` - Set text color
+- `--color <color>` - Set text color (red, green, blue, yellow, purple, cyan)
 - `--camel` - Convert to camelCase
 - `--snake` - Convert to snake_case
 - `--capitalize` - Capitalize words
 - `--truncate <length>` - Truncate text
 - `--normalize` - Normalize whitespace
+
+**Email Options:**
+- `--subject <subject>` - Set email subject
+- `--recipient <email>` - Set recipient email
+- `--sender <email>` - Set sender email
+- `--template <type>` - Set template (simple, pretty, professional, casual)
+- `--greeting <text>` - Set greeting text
+- `--closing <text>` - Set closing text
+- `--signature <text>` - Set signature text
+- `--format <type>` - Set output format (html, text)
+
+**Document Options:**
 - `--title <title>` - Set HTML title
 - `--author <author>` - Set quote author
 
@@ -212,9 +284,15 @@ node dist/cli.js format "hello world" --capitalize
 node dist/cli.js format "hello world from typescript" --camel
 node dist/cli.js format "hello world from typescript" --snake
 
-# HTML generation
-node dist/cli.js html "My content" --title "My Page"
-node dist/cli.js quote "Great quote" --author "Author Name"
+# HTML documents (using email templates)
+node dist/cli.js html "My content" --title "My Page" --bold
+node dist/cli.js quote "Great quote" --author "Author Name" --italic
+
+# Email templates
+node dist/cli.js email "Hello, this is my message" --subject "Test Email" --template pretty --greeting "Dear Friend" --closing "Best regards" --signature "John Doe"
+node dist/cli.js email "Project update" --subject "Project Status" --template professional --greeting "Dear Team" --closing "Best regards" --signature "Project Manager" --bold
+node dist/cli.js email "Hey there!" --subject "Quick Update" --template casual --greeting "Hi Friend!" --closing "Talk soon!" --bold --color blue
+node dist/cli.js email "Simple message" --subject "Text Email" --format text --greeting "Hi" --closing "Bye"
 ```
 
 ## 📁 Project Structure
@@ -229,7 +307,7 @@ src/
 │   └── text-utils.ts       # Text utility functions
 └── templates/
     ├── index.ts            # Templates exports
-    └── html-template.ts    # HTML template functions
+    └── email-template.ts   # Email template functions
 
 tests/
 ├── formatters/             # Formatter tests

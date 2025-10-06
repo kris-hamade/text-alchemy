@@ -69,9 +69,16 @@ jobs:
     
     - name: Test CLI
       run: |
-        node dist/cli.js --help
+        # Test help display
+        node dist/cli.js
+        # Test text formatting
         node dist/cli.js format "hello world" --camel
         node dist/cli.js format "hello world" --snake
+        node dist/cli.js format "hello world" --capitalize
+        # Test HTML generation
+        node dist/cli.js html "My content" --title "Test Page"
+        # Test quote generation
+        node dist/cli.js quote "Great quote" --author "Test Author"
     
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4

@@ -12,6 +12,9 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all history for proper version detection
+        token: ${{ secrets.GITHUB_TOKEN }}
     
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -20,8 +23,23 @@ jobs:
         cache: 'npm'
         registry-url: 'https://registry.npmjs.org'
     
+    - name: Configure Git
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+    
     - name: Install dependencies
       run: npm ci
+    
+    - name: Extract version from tag
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+    
+    - name: Update package.json version
+      run: |
+        # Replace the development version with the actual tag version
+        sed -i "s/\"version\": \".*\"/\"version\": \"${{ steps.version.outputs.VERSION }}\"/" package.json
+        echo "Updated version to ${{ steps.version.outputs.VERSION }}"
     
     - name: Build project
       run: npm run build
@@ -33,3 +51,9 @@ jobs:
       run: npm publish
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    
+    - name: Commit version bump
+      run: |
+        git add package.json package-lock.json
+        git commit -m "Bump version to ${{ steps.version.outputs.VERSION }}"
+        git push origin main

@@ -54,6 +54,8 @@ jobs:
     
     - name: Commit version bump
       run: |
+        # Checkout the main branch first
+        git checkout main
         git add package.json package-lock.json
         git commit -m "Bump version to ${{ steps.version.outputs.VERSION }}"
         git push origin main

@@ -75,10 +75,10 @@ jobs:
         node dist/cli.js format "hello world" --camel
         node dist/cli.js format "hello world" --snake
         node dist/cli.js format "hello world" --capitalize
-        # Test HTML generation
-        node dist/cli.js html "My content" --title "Test Page"
-        # Test quote generation
-        node dist/cli.js quote "Great quote" --author "Test Author"
+        # Test HTML generation with new render command
+        node dist/cli.js render "My content" --template professional --title "Test Page"
+        # Test JSON rendering
+        node dist/cli.js render '{"message": "Great quote", "author": "Test Author"}' --format json --template beautiful
     
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4

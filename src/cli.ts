@@ -1,12 +1,17 @@
 #!/usr/bin/env node
 
-/**
- * CLI interface for pretty-text module
- */
+import { readFileSync } from "fs";
+import { resolve } from "path";
 
-import { formatText, capitalizeWords, truncateText, normalizeText, createEmailTemplate, createFormattedEmailContent } from './index';
+import { formatText, capitalizeWords, truncateText, normalizeText } from "./formatters";
+import { renderTree, RenderOptions } from "./renderers/tree";
+import { prepareHtmlOutput, HtmlOutputOptions, TemplateType } from "./outputs/html";
+import { prepareMarkdownOutput } from "./outputs/markdown";
+import { prepareTextOutput } from "./outputs/text";
+import { buildMailPayload } from "./mailers/smtp";
 
 interface CliOptions {
+  // Formatting
   bold?: boolean;
   italic?: boolean;
   underline?: boolean;
@@ -16,24 +21,26 @@ interface CliOptions {
   capitalize?: boolean;
   truncate?: number;
   normalize?: boolean;
-  html?: boolean;
-  title?: string;
-  quote?: boolean;
-  author?: string;
-  // Email template options
-  subject?: string;
-  recipient?: string;
-  sender?: string;
-  template?: string;
-  greeting?: string;
-  closing?: string;
-  signature?: string;
+
+  // Rendering
   format?: string;
+  template?: string;
+  title?: string;
+  depth?: number;
+  file?: string;
+  email?: boolean;
+  output?: string;
 }
 
-function parseArgs(): { command: string; text: string; options: CliOptions } {
+interface ParsedArgs {
+  command: string;
+  input: string;
+  options: CliOptions;
+}
+
+function parseArgs(): ParsedArgs {
   const args = process.argv.slice(2);
-  
+
   if (args.length === 0) {
     showHelp();
     process.exit(0);
@@ -41,241 +48,301 @@ function parseArgs(): { command: string; text: string; options: CliOptions } {
 
   const command = args[0];
   const options: CliOptions = {};
-  
-  // Parse flags first to separate them from text
   const textArgs: string[] = [];
+
   for (let i = 1; i < args.length; i++) {
     const arg = args[i];
-    
-    if (arg.startsWith('--')) {
+
+    if (arg.startsWith("--")) {
       const key = arg.slice(2);
       const value = args[i + 1];
-      
+
       switch (key) {
-        case 'bold':
+        // Formatting flags
+        case "bold":
           options.bold = true;
           break;
-        case 'italic':
+        case "italic":
           options.italic = true;
           break;
-        case 'underline':
+        case "underline":
           options.underline = true;
           break;
-        case 'color':
+        case "color":
           options.color = value;
-          i++; // Skip the value
+          i++;
           break;
-        case 'camel':
+        case "camel":
           options.camel = true;
           break;
-        case 'snake':
+        case "snake":
           options.snake = true;
           break;
-        case 'capitalize':
+        case "capitalize":
           options.capitalize = true;
           break;
-        case 'truncate':
-          options.truncate = parseInt(value);
-          i++; // Skip the value
+        case "truncate":
+          options.truncate = parseInt(value, 10);
+          i++;
           break;
-        case 'normalize':
+        case "normalize":
           options.normalize = true;
           break;
-        case 'html':
-          options.html = true;
-          break;
-        case 'title':
-          options.title = value;
-          i++; // Skip the value
-          break;
-        case 'quote':
-          options.quote = true;
-          break;
-        case 'author':
-          options.author = value;
-          i++; // Skip the value
-          break;
-        case 'subject':
-          options.subject = value;
-          i++; // Skip the value
-          break;
-        case 'recipient':
-          options.recipient = value;
-          i++; // Skip the value
-          break;
-        case 'sender':
-          options.sender = value;
-          i++; // Skip the value
-          break;
-        case 'template':
-          options.template = value;
-          i++; // Skip the value
-          break;
-        case 'greeting':
-          options.greeting = value;
-          i++; // Skip the value
-          break;
-        case 'closing':
-          options.closing = value;
-          i++; // Skip the value
-          break;
-        case 'signature':
-          options.signature = value;
-          i++; // Skip the value
-          break;
-        case 'format':
+
+        // Rendering
+        case "format":
           options.format = value;
-          i++; // Skip the value
+          i++;
+          break;
+        case "template":
+          options.template = value;
+          i++;
+          break;
+        case "title":
+          options.title = value;
+          i++;
+          break;
+        case "depth":
+          options.depth = parseInt(value, 10);
+          i++;
+          break;
+        case "file":
+          options.file = value;
+          i++;
+          break;
+        case "email":
+          options.email = true;
+          break;
+        case "output":
+          options.output = value;
+          i++;
+          break;
+        default:
+          // Unknown flag - ignore or handle later
           break;
       }
     } else {
       textArgs.push(arg);
     }
   }
-  
-  const text = textArgs.join(' ');
 
-  return { command, text, options };
+  const input = textArgs.join(" ");
+  return { command, input, options };
 }
 
 function showHelp() {
-    console.log(`
-📝 Pretty Text CLI
+  console.log(`
+🧪 Text Alchemy CLI
 
-Usage: pretty-text <command> <text> [options]
+Usage: text-alchemy <command> [input] [options]
 
 Commands:
-  format    Format text with styling options
-  html      Generate HTML template
-  quote     Create a quote block
-  email     Create an email template
+  format <text>             Apply inline text formatting (bold, camel, etc)
+  render <data>             Render JSON/arrays/text into HTML/Markdown/tables
 
-Options:
-  --bold              Make text bold
-  --italic            Make text italic
-  --underline         Make text underlined
-  --color <color>     Set text color (red, green, blue, yellow, purple, cyan)
-  --camel             Convert to camelCase
-  --snake             Convert to snake_case
-  --capitalize        Capitalize words
-  --truncate <length> Truncate text to specified length
-  --normalize         Normalize whitespace
-  --html              Generate HTML output
-  --title <title>     Set HTML title
-  --quote             Create quote block
-  --author <author>   Set quote author
-  
-  Email Options:
-  --subject <subject>     Set email subject
-  --recipient <email>     Set recipient email
-  --sender <email>        Set sender email
-  --template <type>       Set template type (simple, pretty, professional, casual)
-  --greeting <text>       Set greeting text
-  --closing <text>        Set closing text
-  --signature <text>      Set signature text
-  --format <type>         Set output format (html, text)
+Formatting Options:
+  --bold                    Make text bold
+  --italic                  Make text italic
+  --underline               Make text underlined
+  --color <color>           Set text color (red, green, blue, yellow, purple, cyan)
+  --camel                   Convert to camelCase
+  --snake                   Convert to snake_case
+  --capitalize              Capitalize words
+  --truncate <length>       Truncate text to specified length
+  --normalize               Normalize whitespace
+
+Rendering Options:
+  --format <type>           Output type: html | markdown | text-table (default html)
+  --template <name>         Template: simple | beautiful | professional
+  --title <title>           Title to include in templated output
+  --depth <level>           Maximum depth to traverse nested data (default unlimited)
+  --file <path>             Load input data from a file (JSON/Markdown/Text)
+  --email                   Output email payload JSON ({ html, text })
+  --output <type>           Force final output type: html | markdown | text
 
 Examples:
-  pretty-text format "Hello World" --bold --color red
-  pretty-text format "hello world" --capitalize
-  pretty-text format "hello world from typescript" --camel
-  pretty-text format "hello world from typescript" --snake
-  pretty-text format "very long text" --truncate 20
-  pretty-text html "My content" --title "My Page"
-  pretty-text quote "Great quote" --author "Author Name"
-  pretty-text email "Hello, this is my message" --subject "Test Email" --template pretty --greeting "Dear Friend"
+  text-alchemy format "Hello World" --bold --color blue
+  text-alchemy render '{"foo": "bar"}' --format html --template professional
+  text-alchemy render data.json --file data.json --format markdown
+  text-alchemy render '{"items": [1,2,3]}' --format text-table
+  text-alchemy render event.json --file event.json --email --template professional
 `);
 }
 
-function executeCommand(command: string, text: string, options: CliOptions) {
-    let result = text;
-
-    switch (command) {
-        case 'format':
-            if (options.capitalize) {
-                result = capitalizeWords(text);
-            } else if (options.truncate) {
-                result = truncateText(text, options.truncate);
-            } else if (options.normalize) {
-                result = normalizeText(text);
-            } else {
-        result = formatText(text, {
-          bold: options.bold,
-          italic: options.italic,
-          underline: options.underline,
-          color: options.color as any,
-          camel: options.camel,
-          snake: options.snake
-        });
-            }
-            break;
-
-        case 'html':
-            // Use email template for HTML generation with document styling
-            const htmlContent = createFormattedEmailContent(text, {
-                greeting: options.quote ? undefined : 'Document',
-                closing: options.quote ? options.author : undefined,
-                signature: options.quote ? undefined : 'Generated with Text Alchemy',
-                bold: options.bold,
-                italic: options.italic,
-                color: options.color
-            });
-            
-            result = createEmailTemplate(htmlContent, {
-                subject: options.title || 'Pretty Text Document',
-                template: 'professional', // Use professional template for documents
-                format: 'html'
-            });
-            break;
-
-        case 'quote':
-            // Use email template for quote generation
-            const quoteContent = createFormattedEmailContent(text, {
-                greeting: 'Quote',
-                closing: options.author,
-                signature: 'Generated with Text Alchemy'
-            });
-            
-            result = createEmailTemplate(quoteContent, {
-                subject: 'Quote',
-                template: 'pretty',
-                format: 'html'
-            });
-            break;
-
-        case 'email':
-            const emailContent = createFormattedEmailContent(text, {
-                greeting: options.greeting,
-                closing: options.closing,
-                signature: options.signature,
-                bold: options.bold,
-                italic: options.italic,
-                color: options.color
-            });
-            
-            result = createEmailTemplate(emailContent, {
-                subject: options.subject,
-                recipient: options.recipient,
-                sender: options.sender,
-                template: options.template as any,
-                format: options.format as any
-            });
-            break;
-
-        default:
-            console.error(`Unknown command: ${command}`);
-            showHelp();
-            process.exit(1);
-    }
-
-    console.log(result);
+function executeCommand({ command, input, options }: ParsedArgs) {
+  switch (command) {
+    case "format":
+      return executeFormat(input, options);
+    case "render":
+      return executeRender(input, options);
+    case "help":
+      showHelp();
+      return;
+    default:
+      console.error(`Unknown command: ${command}`);
+      showHelp();
+      process.exit(1);
+  }
 }
 
-// Main execution
-try {
-    const { command, text, options } = parseArgs();
-    executeCommand(command, text, options);
-} catch (error) {
-    console.error('Error:', error);
+function executeFormat(input: string, options: CliOptions) {
+  if (!input) {
+    console.error("No text provided for format command.");
     process.exit(1);
+  }
+
+  let result = input;
+
+  if (options.capitalize) {
+    result = capitalizeWords(result);
+  } else if (options.truncate) {
+    result = truncateText(result, options.truncate);
+  } else if (options.normalize) {
+    result = normalizeText(result);
+  } else {
+    result = formatText(result, {
+      bold: options.bold,
+      italic: options.italic,
+      underline: options.underline,
+      color: options.color as any,
+      camel: options.camel,
+      snake: options.snake,
+    });
+  }
+
+  console.log(result);
+}
+
+function executeRender(input: string, options: CliOptions) {
+  const rawData = loadInputData(input, options.file);
+  const depth = typeof options.depth === "number" && !isNaN(options.depth) ? options.depth : Infinity;
+  const renderFormat = (options.format ?? "html") as RenderOptions["format"];
+
+  const rendered = renderTree(rawData, {
+    format: renderFormat,
+    depth,
+  });
+
+  const template = options.template === "none" ? null : (options.template as TemplateType | undefined);
+  const title = options.title;
+
+  if (options.email) {
+    const htmlContent = buildHtmlBase(renderFormat, rendered, rawData, depth, template === null);
+    const wrappedHtml = prepareHtmlOutput(htmlContent, {
+      template: template === null ? null : template ?? "professional",
+      title,
+      for: "email",
+    } as HtmlOutputOptions);
+    const textContent = prepareTextOutput(
+      renderTree(rawData, {
+        format: "text-table",
+        depth,
+      })
+    );
+    const payload = buildMailPayload(wrappedHtml, { html: wrappedHtml, text: textContent });
+    console.log(JSON.stringify(payload, null, 2));
+    return;
+  }
+
+  let output: string = rendered;
+  const desiredOutput = options.output ?? renderFormat;
+
+  switch (desiredOutput) {
+    case "html": {
+      const htmlBase = buildHtmlBase(renderFormat, rendered, rawData, depth, template === null);
+      output = prepareHtmlOutput(htmlBase, {
+        template,
+        title,
+        for: "web",
+      } as HtmlOutputOptions);
+      break;
+    }
+    case "markdown":
+      output = renderFormat === "markdown" ? rendered : renderTree(rawData, { format: "markdown", depth });
+      output = prepareMarkdownOutput(output);
+      break;
+    case "text":
+    case "text-table":
+      output = renderFormat === "text-table" ? rendered : renderTree(rawData, { format: "text-table", depth });
+      output = prepareTextOutput(output);
+      break;
+    default:
+      if (desiredOutput === "json") {
+        output = renderFormat === "json" ? rendered : renderTree(rawData, { format: "json", depth });
+      }
+      break;
+  }
+
+  console.log(output);
+}
+
+function loadInputData(input: string, file?: string): unknown {
+  if (file) {
+    const absolute = resolve(process.cwd(), file);
+    const contents = readFileSync(absolute, "utf-8");
+    return parseData(contents);
+  }
+
+  if (!input) {
+    console.error("No input provided for render command. Provide JSON string or --file path.");
+    process.exit(1);
+  }
+
+  return parseData(input);
+}
+
+function parseData(value: string): unknown {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    return trimmed;
+  }
+}
+
+function buildHtmlBase(
+  format: RenderOptions["format"],
+  rendered: string,
+  rawData: unknown,
+  depth: number,
+  templateIsNull: boolean
+): string {
+  if (templateIsNull) {
+    if (format === "json") {
+      return wrapJsonHtml(rendered);
+    }
+    return rendered;
+  }
+
+  if (format === "html") {
+    return rendered;
+  }
+
+  if (format === "json") {
+    return wrapJsonHtml(rendered);
+  }
+
+  return renderTree(rawData, { format: "html", depth });
+}
+
+function wrapJsonHtml(content: string): string {
+  return `<pre class="ta-json">${escapeHtml(content)}</pre>`;
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+try {
+  const parsed = parseArgs();
+  executeCommand(parsed);
+} catch (error) {
+  console.error("Error:", error);
+  process.exit(1);
 }

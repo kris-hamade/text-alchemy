@@ -2,4 +2,6 @@
  * Templates module exports
  */
 
-export * from "./email-template";
+export * from "./simple";
+export * from "./beautiful";
+export * from "./professional";

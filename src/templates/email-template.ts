@@ -8,6 +8,7 @@ export interface EmailTemplateOptions {
   sender?: string;
   template?: "simple" | "pretty" | "professional" | "casual";
   format?: "html" | "text";
+  footer?: string;
 }
 
 export interface EmailContent {
@@ -25,25 +26,29 @@ export interface EmailContent {
  */
 export function createEmailTemplate(content: EmailContent, options: EmailTemplateOptions = {}): string {
   const {
-    subject = "Email from Text Alchemy",
-    recipient = "Recipient",
-    sender = "Sender",
+    subject,
+    recipient,
+    sender,
     template = "pretty",
     format = "html",
+    footer = "Generated with Text Alchemy",
   } = options;
+
+  const resolvedSubject = subject ?? "Text Alchemy Output";
 
   if (format === "text") {
     return createTextEmail(content, options);
   }
 
   const templateStyles = getTemplateStyles(template);
+  const hasMeta = Boolean(recipient || sender);
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${subject}</title>
+    <title>${resolvedSubject}</title>
     <style>
         ${templateStyles}
     </style>
@@ -51,11 +56,11 @@ export function createEmailTemplate(content: EmailContent, options: EmailTemplat
 <body>
     <div class="email-container">
         <div class="email-header">
-            <h1 class="email-subject">${subject}</h1>
-            <div class="email-meta">
-                <p><strong>To:</strong> ${recipient}</p>
-                <p><strong>From:</strong> ${sender}</p>
-            </div>
+            <h1 class="email-subject">${resolvedSubject}</h1>
+            ${hasMeta ? `<div class="email-meta">
+                ${recipient ? `<p><strong>To:</strong> ${recipient}</p>` : ""}
+                ${sender ? `<p><strong>From:</strong> ${sender}</p>` : ""}
+            </div>` : ""}
         </div>
         
         <div class="email-body">
@@ -67,9 +72,9 @@ export function createEmailTemplate(content: EmailContent, options: EmailTemplat
             ${content.signature ? `<p class="signature">${content.signature}</p>` : ""}
         </div>
         
-        <div class="email-footer">
-            <p class="footer-text">Generated with Text Alchemy</p>
-        </div>
+        ${footer ? `<div class="email-footer">
+            <p class="footer-text">${footer}</p>
+        </div>` : ""}
     </div>
 </body>
 </html>`;
@@ -79,12 +84,24 @@ export function createEmailTemplate(content: EmailContent, options: EmailTemplat
  * Creates a plain text email
  */
 function createTextEmail(content: EmailContent, options: EmailTemplateOptions): string {
-  const { subject = "Email from Text Alchemy", recipient = "Recipient", sender = "Sender" } = options;
+  const {
+    subject,
+    recipient,
+    sender,
+    footer = "Generated with Text Alchemy",
+  } = options;
 
-  return `Subject: ${subject}
-To: ${recipient}
-From: ${sender}
+  const resolvedSubject = subject ?? "Text Alchemy Output";
+  const metaLines: string[] = [];
+  if (recipient) {
+    metaLines.push(`To: ${recipient}`);
+  }
+  if (sender) {
+    metaLines.push(`From: ${sender}`);
+  }
+  const metaBlock = metaLines.length ? `\n${metaLines.join("\n")}\n` : "";
 
+  return `Subject: ${resolvedSubject}${metaBlock}
 ${content.greeting || ""}
 
 ${content.body}
@@ -94,7 +111,7 @@ ${content.closing || ""}
 ${content.signature || ""}
 
 ---
-Generated with Text Alchemy`;
+${footer}`;
 }
 
 /**

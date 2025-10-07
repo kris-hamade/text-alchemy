@@ -1,6 +1,6 @@
 {
   "name": "text-alchemy",
-  "version": "1.0.0-alpha.4",
+  "version": "1.0.0-alpha.5",
   "description": "A comprehensive TypeScript library for text formatting, manipulation, and HTML template generation",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

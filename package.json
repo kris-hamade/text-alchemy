@@ -9,8 +9,15 @@
   "scripts": {
     "start": "node src/index.js",
     "example": "node src/examples/parser-example.js",
-    "test": "node src/examples/parser-example.js",
-    "prepublishOnly": "npm test"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --ci --coverage --watchAll=false",
+    "lint": "echo 'No linter configured'",
+    "format": "echo 'No formatter configured'",
+    "prepublishOnly": "npm run test:ci",
+    "version": "git add -A",
+    "postversion": "git push && git push --tags"
   },
   "keywords": [
     "javascript",
@@ -22,8 +29,16 @@
     "cli",
     "text-processing",
     "alchemy",
-    "text-alchemy"
+    "text-alchemy",
+    "base64",
+    "html",
+    "email",
+    "smtp",
+    "reporting"
   ],
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "author": "kris-hamade <khamade22@gmail.com>",
   "license": "MIT",
   "repository": {
@@ -33,6 +48,22 @@
   "homepage": "https://github.com/kris-hamade/text-alchemy#readme",
   "bugs": {
     "url": "https://github.com/kris-hamade/text-alchemy/issues"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/examples/**"
+    ],
+    "coverageDirectory": "coverage",
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ]
   },
   "files": [
     "src/**/*"

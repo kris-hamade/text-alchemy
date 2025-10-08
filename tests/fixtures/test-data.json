@@ -1,0 +1,15 @@
+{
+  "message": {
+    "attributes": {
+      "eventType": "SECRET_VERSION_ADD",
+      "resourceName": "projects/my-project/secrets/my-secret/versions/5"
+    },
+    "data": "eyJldmVudFR5cGUiOiAiU0VDUkVUX1ZFUlNJT05fQUREIiwgInJlc291cmNlIjogInByb2plY3RzL215LXByb2plY3Qvc2VjcmV0cy9teS1zZWNyZXQvdmVyc2lvbnMvNSIsICJldmVudFRpbWUiOiAiMjAyNS0xMC0wOFQwMzo0NToxNloifQ==",
+    "messageId": "123456789012345",
+    "publishTime": "2025-10-08T03:45:16.123Z",
+    "status": true,
+    "count": 42,
+    "description": null
+  },
+  "subscription": "projects/my-project/subscriptions/secret-events-sub"
+}

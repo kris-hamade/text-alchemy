@@ -1,0 +1,6 @@
+{
+  "encoded": "dGVzdA==",
+  "jsonEncoded": "eyJuYW1lIjogIkpvaG4iLCAiYWdlIjogMzB9",
+  "invalidBase64": "not-base64",
+  "normal": "regular string"
+}

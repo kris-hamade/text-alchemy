@@ -55,7 +55,7 @@ function runExample() {
   console.log('Example with auto depth + recursive JSON:');
   console.log('Configuration:', { auto: true, indent: '   ', decodeBase64: true, recursiveJson: true });
   console.log('---');
-
+  
   try {
     const jsonFilePath = path.join(__dirname, '..', '..', 'jsonObj.json');
     // Auto depth with Base64 decoding + recursive JSON formatting
@@ -63,6 +63,25 @@ function runExample() {
     console.log(formattedJson);
   } catch (error) {
     console.error('Error parsing file:', error);
+  }
+
+  console.log('\n---\n');
+  console.log('Example with HTML formatting:');
+  console.log('Configuration:', { depth: 3, decodeBase64: true, recursiveJson: true, format: 'HTML' });
+  console.log('---');
+  
+  try {
+    const jsonFilePath = path.join(__dirname, '..', '..', 'jsonObj.json');
+    // HTML formatting with Base64 decoding + recursive JSON
+    const htmlOutput = parser.parseJsonFromFileAsHtml(jsonFilePath, 3, true, true, 'Event Data Report');
+    console.log(htmlOutput);
+    console.log('✅ HTML generated! Length:', htmlOutput.length, 'characters');
+    console.log('📧 Ready to plug into SMTP email or web application!');
+    console.log('💡 Example usage:');
+    console.log('   const htmlEmail = parser.parseJsonFromFileAsHtml(file, 3, true, true, "Report");');
+    console.log('   smtpMailer.send({ to: "user@example.com", html: htmlEmail });');
+  } catch (error) {
+    console.error('Error generating HTML:', error);
   }
 
   try {

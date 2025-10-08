@@ -269,6 +269,38 @@ npm test
 ### Building
 No build step required - this is a pure JavaScript module.
 
+### Versioning and Publishing
+
+This project uses semantic versioning and publishes automatically on version tags.
+
+#### Creating a new version:
+```bash
+# Patch version (1.0.0 -> 1.0.1)
+npm run version:patch
+
+# Minor version (1.0.0 -> 1.1.0)
+npm run version:minor
+
+# Major version (1.0.0 -> 2.0.0)
+npm run version:major
+
+# Prerelease version (1.0.0 -> 1.0.1-0)
+npm run version:prerelease
+```
+
+#### Manual versioning:
+```bash
+# Create a specific version
+npm version 1.0.0
+git push && git push --tags
+
+# Create a prerelease version
+npm version 1.0.0-alpha.5
+git push && git push --tags
+```
+
+**Note**: Publishing to NPM happens automatically when you push a version tag (e.g., `v1.0.0`, `v1.0.0-alpha.5`).
+
 ## License
 
 MIT

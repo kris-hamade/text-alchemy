@@ -16,8 +16,10 @@
     "lint": "echo 'No linter configured'",
     "format": "echo 'No formatter configured'",
     "prepublishOnly": "npm run test:ci",
-    "version": "git add -A",
-    "postversion": "git push && git push --tags"
+    "version:patch": "npm version patch && git push && git push --tags",
+    "version:minor": "npm version minor && git push && git push --tags",
+    "version:major": "npm version major && git push && git push --tags",
+    "version:prerelease": "npm version prerelease && git push && git push --tags"
   },
   "keywords": [
     "javascript",

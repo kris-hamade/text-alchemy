@@ -81,10 +81,48 @@ When reporting bugs:
 
 ## Release Process
 
-Releases are handled automatically via GitHub Actions:
-- Version bumps trigger releases
+### For Maintainers
+
+1. **Update version and create tag:**
+   ```bash
+   # For patch releases (bug fixes)
+   npm run version:patch
+   
+   # For minor releases (new features)
+   npm run version:minor
+   
+   # For major releases (breaking changes)
+   npm run version:major
+   
+   # For prerelease versions
+   npm run version:prerelease
+   ```
+
+2. **Manual versioning (if needed):**
+   ```bash
+   # Create a specific version
+   npm version 1.0.0
+   git push && git push --tags
+   
+   # Create a prerelease version
+   npm version 1.0.0-alpha.5
+   git push && git push --tags
+   ```
+
+3. **Automatic publishing:**
+   - The CI/CD pipeline automatically publishes to NPM when a version tag is pushed
+   - No manual intervention required after creating the tag
+
+### Version Tag Format
+
+- **Stable releases**: `v1.0.0`, `v1.1.0`, `v2.0.0`
+- **Prerelease versions**: `v1.0.0-alpha.1`, `v1.0.0-beta.5`, `v1.0.0-rc.1`
+
+### Release Requirements
+
 - Tests must pass before publishing
 - Semantic versioning is used
+- Version tags trigger automatic NPM publishing
 
 ## Questions?
 

@@ -1,36 +1,25 @@
 {
   "name": "text-alchemy",
-  "version": "1.0.0-alpha.5",
-  "description": "A comprehensive TypeScript library for text formatting, manipulation, and HTML template generation",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "version": "1.0.0",
+  "description": "A simple Node.js library for JSON parsing and text formatting",
+  "main": "src/index.js",
   "bin": {
-    "text-alchemy": "dist/cli.js"
+    "text-alchemy": "src/index.js"
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test:manual": "node test.js",
-    "cli": "node dist/cli.js",
-    "pretty": "node dist/cli.js",
-    "prepublishOnly": "npm run build",
-    "version:patch": "npm version patch && git push origin main --tags",
-    "version:minor": "npm version minor && git push origin main --tags",
-    "version:major": "npm version major && git push origin main --tags",
-    "release": "npm run build && npm run test && npm run version:patch"
+    "start": "node src/index.js",
+    "example": "node src/examples/parser-example.js",
+    "test": "node src/examples/parser-example.js",
+    "prepublishOnly": "npm test"
   },
   "keywords": [
-    "typescript",
+    "javascript",
+    "node",
+    "json",
+    "parser",
     "text",
     "formatting",
     "cli",
-    "html",
-    "templates",
-    "camelcase",
-    "snakecase",
     "text-processing",
     "alchemy",
     "text-alchemy"
@@ -45,14 +34,7 @@
   "bugs": {
     "url": "https://github.com/kris-hamade/text-alchemy/issues"
   },
-  "devDependencies": {
-    "@types/jest": "^29.0.0",
-    "@types/node": "^20.0.0",
-    "jest": "^29.0.0",
-    "ts-jest": "^29.0.0",
-    "typescript": "^5.0.0"
-  },
   "files": [
-    "dist/**/*"
+    "src/**/*"
   ]
 }

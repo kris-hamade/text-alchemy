@@ -1,195 +1,138 @@
 # Text Alchemy
 
-[![CI](https://github.com/kris-hamade/text-alchemy/workflows/CI/badge.svg)](https://github.com/kris-hamade/text-alchemy/actions)
-[![npm version](https://badge.fury.io/js/text-alchemy.svg)](https://badge.fury.io/js/text-alchemy)
-[![Coverage Status](https://codecov.io/gh/kris-hamade/text-alchemy/branch/main/graph/badge.svg)](https://codecov.io/gh/kris-hamade/text-alchemy)
+A simple Node.js library for JSON parsing and text formatting.
 
-Text Alchemy is a TypeScript toolkit for transforming raw strings, JSON, or arrays into polished HTML, Markdown, or text-table presentations. Pair it with your SMTP relay, logging pipelines, or dashboards to eliminate bespoke formatting code in every service.
-
-## ✨ Highlights
-
-- 🎨 **Inline formatting** – bold, italic, underline, ANSI colors, camelCase, snake_case
-- 🧱 **Data renderers** – JSON/array → HTML lists, Markdown bullet trees, text tables
-- 🧩 **Visual templates** – simple, beautiful, professional wrappers (web or email-ready)
-- 📨 **Mail payloads** – get `{ html, text }` bodies ready for SMTP mailers (no sending)
-- 🧪 **Typed + tested** – written in TypeScript with Jest coverage
-- 🛠️ **CLI & API** – use from node scripts or directly from your terminal
-
-## 📦 Installation
+## Installation
 
 ```bash
 npm install text-alchemy
 ```
 
-## 🚀 Quick Start
+## Usage
 
-### Inline Formatting
+### Basic Usage
 
-```typescript
-import { formatText, capitalizeWords, truncateText, normalizeText } from "text-alchemy";
+```javascript
+const JsonParser = require('text-alchemy');
 
-const bold = formatText("Hello World", { bold: true });             // "**Hello World**"
-const camel = formatText("hello world from typescript", { camel: true });
-const snake = formatText("hello world from typescript", { snake: true });
-const truncated = truncateText("Very long text that should be shortened", 20); // "Very long text th..."
-const normalized = normalizeText("  messy   text  ");                         // "messy text"
-const titleCase = capitalizeWords("hello world");                             // "Hello World"
+const parser = new JsonParser();
+
+// Basic usage
+const formattedJson = parser.parseJsonFromFile('path/to/file.json', 3, '  ');
+console.log(formattedJson);
+
+// With Base64 decoding
+const withBase64 = parser.parseJsonFromFile('path/to/file.json', 3, '  ', true);
+console.log(withBase64);
+
+// Auto depth mode (goes as deep as possible)
+const autoDepth = parser.parseJsonFromFileAuto('path/to/file.json', '  ');
+console.log(autoDepth);
+
+// Auto depth + Base64 decoding
+const autoWithBase64 = parser.parseJsonFromFileAuto('path/to/file.json', '  ', true);
+console.log(autoWithBase64);
+
+// Recursive JSON formatting (decodes Base64 and formats nested JSON)
+const recursive = parser.parseJsonFromFile('path/to/file.json', 3, '  ', true, true);
+console.log(recursive);
+
+// Ultimate power: Auto depth + Base64 + recursive JSON
+const ultimate = parser.parseJsonFromFileAuto('path/to/file.json', '  ', true, true);
+console.log(ultimate);
 ```
 
-### Render JSON/Arrays
-
-```typescript
-import { renderTree } from "text-alchemy";
-
-const payload = {
-  subject: "System Report",
-  metrics: { users: 1280, active: 437 },
-  flags: [
-    { name: "beta", enabled: true },
-    { name: "dark_mode", enabled: false }
-  ]
-};
-
-const htmlTree = renderTree(payload, { format: "html" });        // nested HTML lists
-const markdownTree = renderTree(payload, { format: "markdown" }); // bullet tree
-const table = renderTree(payload.flags, { format: "text-table" }); // ascii table
-```
-
-### Apply Templates & Outputs
-
-```typescript
-import { prepareHtmlOutput, prepareMarkdownOutput, prepareTextOutput } from "text-alchemy";
-
-const html = prepareHtmlOutput(htmlTree, { template: "professional", title: "System Report" });
-const markdown = prepareMarkdownOutput(markdownTree);
-const text = prepareTextOutput(table);
-```
-
-### Build Mail Payloads
-
-```typescript
-import { buildMailPayload, renderTree, prepareHtmlOutput } from "text-alchemy";
-
-const htmlContent = renderTree(payload, { format: "html" });
-const wrapped = prepareHtmlOutput(htmlContent, { template: "professional", for: "email", title: "System Report" });
-const mail = buildMailPayload(wrapped);
-// mail => { html: "...", text: "..." }
-// Pass mail.html & mail.text to your nodemailer transport
-```
-
-## 🖥️ CLI Usage
+### CLI Usage
 
 ```bash
-# Inline formatting
-text-alchemy format "Hello World" --bold --color blue
+# Run with default settings
+npx text-alchemy
 
-# Render JSON directly
-text-alchemy render '{"foo": "bar"}' --format html --template simple
-
-# Render from file, produce Markdown
-text-alchemy render --file payload.json --format markdown
-
-# Create text table
-text-alchemy render '{"items":[{"name":"beta","enabled":true}]}' --format text-table
-
-# Generate email payload JSON ({ html, text })
-text-alchemy render --file event.json --template professional --email
+# Or install globally
+npm install -g text-alchemy
+text-alchemy
 ```
 
-### CLI Commands & Flags
+## API
 
-| Command | Description |
-|---------|-------------|
-| `format <text>` | Apply inline styles (bold, camelCase, etc) |
-| `render <data>` | Render JSON/array/text into HTML/Markdown/text-table |
+### JsonParser
 
-**Formatting Flags**
-- `--bold`, `--italic`, `--underline`
-- `--color <color>` (red, green, blue, yellow, purple, cyan)
-- `--camel`, `--snake`, `--capitalize`
-- `--truncate <n>`, `--normalize`
+#### `parseJsonFromFile(filePath, depth, indent, decodeBase64 = false, recursiveJson = false)`
+- `filePath` (string): Path to JSON file
+- `depth` (number): Maximum depth to parse
+- `indent` (string): Indentation string
+- `decodeBase64` (boolean): Automatically detect and decode Base64 strings
+- `recursiveJson` (boolean): Format decoded Base64 content as JSON if it's valid JSON
+- **Returns**: Formatted string
 
-**Rendering Flags**
-- `--format <html|markdown|text-table>` (default html)
-- `--template <simple|beautiful|professional>`
-- `--title <title>` (included in templates)
-- `--depth <n>` (limit traversal depth)
-- `--file <path>` (load JSON/Markdown/text from file)
-- `--email` (output `{ html, text }` JSON payload)
-- `--output <html|markdown|text>` (force final output type)
+#### `parseJsonFromFileAuto(filePath, indent, decodeBase64 = false, recursiveJson = false)`
+- `filePath` (string): Path to JSON file
+- `indent` (string): Indentation string
+- `decodeBase64` (boolean): Automatically detect and decode Base64 strings
+- `recursiveJson` (boolean): Format decoded Base64 content as JSON if it's valid JSON
+- **Returns**: Formatted string (goes as deep as the JSON structure allows)
 
-## 📚 API Reference (selected)
+#### `formatData(data, depth, indent, decodeBase64 = false, recursiveJson = false)`
+- `data` (object): JSON data to format
+- `depth` (number): Maximum depth to parse  
+- `indent` (string): Indentation string
+- `decodeBase64` (boolean): Automatically detect and decode Base64 strings
+- `recursiveJson` (boolean): Format decoded Base64 content as JSON if it's valid JSON
+- **Returns**: Formatted string
 
-### Formatting
-- `formatText(text, options)` – inline styling + case transformations
-- `capitalizeWords(text)` – title-case words
-- `truncateText(text, maxLength, suffix)` – limit string length
-- `normalizeText(text)` – collapse whitespace and line breaks
+#### `formatDataAuto(data, indent, decodeBase64 = false, recursiveJson = false)`
+- `data` (object): JSON data to format
+- `indent` (string): Indentation string
+- `decodeBase64` (boolean): Automatically detect and decode Base64 strings
+- `recursiveJson` (boolean): Format decoded Base64 content as JSON if it's valid JSON
+- **Returns**: Formatted string (goes as deep as the JSON structure allows)
 
-### Renderers
-- `renderTree(data, { format, depth })` → string
-  - `format`: `html`, `markdown`, `text-table`
-  - `depth`: maximum traversal depth (default unlimited)
+## Default Values
 
-### Templates & Outputs
-- `prepareHtmlOutput(content, { template, title, for })`
-- `prepareMarkdownOutput(content)`
-- `prepareTextOutput(content)`
-- Templates: `simple`, `beautiful`, `professional`
+- **Default depth**: 3
+- **Default indent**: "   " (3 spaces)
 
-### Mail Payloads
-- `buildMailPayload(content, options)` → `{ html, text }`
-  - Accepts raw HTML or uses template when not provided
+## Examples
 
-## 🧪 Tests
+```javascript
+const JsonParser = require('text-alchemy');
+const parser = new JsonParser();
 
-```bash
-npm test
-npm run test:watch
-npm run test:coverage
+// Basic usage
+const formatted = parser.parseJsonFromFile('data.json', 3, '   ');
+console.log(formatted);
+
+// With Base64 decoding
+const withBase64 = parser.parseJsonFromFile('data.json', 3, '   ', true);
+console.log(withBase64);
+
+// Auto depth mode (goes as deep as possible)
+const autoDepth = parser.parseJsonFromFileAuto('data.json', '   ');
+console.log(autoDepth);
+
+// Auto depth + Base64 decoding
+const autoWithBase64 = parser.parseJsonFromFileAuto('data.json', '   ', true);
+console.log(autoWithBase64);
+
+// Recursive JSON formatting (decodes Base64 and formats nested JSON)
+const recursive = parser.parseJsonFromFile('data.json', 3, '   ', true, true);
+console.log(recursive);
+
+// Ultimate power: Auto depth + Base64 + recursive JSON
+const ultimate = parser.parseJsonFromFileAuto('data.json', '   ', true, true);
+console.log(ultimate);
 ```
 
-Coverage includes formatters, renderers, templates, outputs, and CLI flow.
+## Features
 
-## 📁 Project Structure
+- **Base64 Detection**: Automatically detects and decodes Base64 strings
+- **Recursive JSON**: Formats decoded Base64 content as JSON if it's valid JSON
+- **Auto Depth**: Goes as deep as the JSON structure allows
+- **Flexible Formatting**: Customizable depth and indentation
+- **File Support**: Parse JSON from files or data objects
+- **Error Handling**: Robust error handling for invalid JSON
+- **Smart Fallbacks**: Gracefully handles invalid Base64 or malformed JSON
 
-```
-src/
-├── cli.ts
-├── index.ts
-├── formatters/
-│   ├── text-formatter.ts
-│   └── text-utils.ts
-├── renderers/
-│   └── tree.ts
-├── templates/
-│   ├── simple.ts
-│   ├── beautiful.ts
-│   └── professional.ts
-├── outputs/
-│   ├── html.ts
-│   ├── markdown.ts
-│   └── text.ts
-└── mailers/
-    └── smtp.ts
+## License
 
-tests/
-├── formatters/
-├── renderers/
-├── templates/
-└── outputs/
-```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes and add tests
-4. Run tests: `npm test`
-5. Commit: `git commit -m 'Add feature'`
-6. Push: `git push origin feature-name`
-7. Open a pull request
-
-## 📄 License
-
-MIT License – see [LICENSE](LICENSE) for details.
+MIT

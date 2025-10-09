@@ -207,6 +207,48 @@ class JsonParser {
   formatJsonAsHtmlContent(obj, depth, decodeBase64 = false, recursiveJson = false) {
     if (depth < 0) return '';
 
+    // Handle primitive values directly
+    if (typeof obj !== 'object' || obj === null) {
+      let displayValue = obj;
+      let valueClass = 'json-value';
+      
+      if (decodeBase64 && typeof obj === 'string') {
+        const decoded = this.decodeBase64IfValid(obj, recursiveJson);
+        if (recursiveJson && typeof decoded === 'object' && decoded !== null) {
+          // If it's a parsed JSON object, format it recursively
+          return this.formatJsonAsHtmlContent(decoded, depth - 1, decodeBase64, recursiveJson);
+        } else {
+          displayValue = decoded;
+        }
+      }
+
+      // Determine CSS class based on value type
+      if (typeof displayValue === 'string') {
+        valueClass = 'json-string';
+      } else if (typeof displayValue === 'number') {
+        valueClass = 'json-number';
+      } else if (typeof displayValue === 'boolean') {
+        valueClass = 'json-boolean';
+      } else if (displayValue === null) {
+        valueClass = 'json-null';
+      }
+
+      return `<span class="${valueClass}">${this.escapeHtml(String(displayValue))}</span>`;
+    }
+
+    // Handle arrays
+    if (Array.isArray(obj)) {
+      let html = '';
+      for (let i = 0; i < obj.length; i++) {
+        html += `<div class="json-item">
+          <span class="json-key">${i}:</span>
+          ${this.formatJsonAsHtmlContent(obj[i], depth - 1, decodeBase64, recursiveJson)}
+        </div>`;
+      }
+      return html;
+    }
+
+    // Handle objects
     let html = '';
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {

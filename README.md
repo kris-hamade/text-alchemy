@@ -275,31 +275,19 @@ This project uses semantic versioning and publishes automatically on version tag
 
 #### Creating a new version:
 ```bash
-# Patch version (1.0.0 -> 1.0.1)
-npm run version:patch
+# Create a git tag for the version you want
+git tag v1.0.0
+git push origin v1.0.0
 
-# Minor version (1.0.0 -> 1.1.0)
-npm run version:minor
-
-# Major version (1.0.0 -> 2.0.0)
-npm run version:major
-
-# Prerelease version (1.0.0 -> 1.0.1-0)
-npm run version:prerelease
+# Or for prerelease versions
+git tag v1.0.0-alpha.5
+git push origin v1.0.0-alpha.5
 ```
 
-#### Manual versioning:
-```bash
-# Create a specific version
-npm version 1.0.0
-git push && git push --tags
-
-# Create a prerelease version
-npm version 1.0.0-alpha.5
-git push && git push --tags
-```
-
-**Note**: Publishing to NPM happens automatically when you push a version tag (e.g., `v1.0.0`, `v1.0.0-alpha.5`).
+**Note**: 
+- The CI pipeline runs tests and builds on every push to main/develop
+- Publishing to NPM happens automatically when you push a version tag (e.g., `v1.0.0`, `v1.0.0-alpha.5`)
+- The publish workflow automatically extracts the version from the git tag and updates package.json
 
 ## License
 

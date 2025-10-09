@@ -83,34 +83,21 @@ When reporting bugs:
 
 ### For Maintainers
 
-1. **Update version and create tag:**
+1. **Create version tag:**
    ```bash
-   # For patch releases (bug fixes)
-   npm run version:patch
+   # Create a git tag for the version you want
+   git tag v1.0.0
+   git push origin v1.0.0
    
-   # For minor releases (new features)
-   npm run version:minor
-   
-   # For major releases (breaking changes)
-   npm run version:major
-   
-   # For prerelease versions
-   npm run version:prerelease
+   # Or for prerelease versions
+   git tag v1.0.0-alpha.5
+   git push origin v1.0.0-alpha.5
    ```
 
-2. **Manual versioning (if needed):**
-   ```bash
-   # Create a specific version
-   npm version 1.0.0
-   git push && git push --tags
-   
-   # Create a prerelease version
-   npm version 1.0.0-alpha.5
-   git push && git push --tags
-   ```
-
-3. **Automatic publishing:**
-   - The CI/CD pipeline automatically publishes to NPM when a version tag is pushed
+2. **Automatic publishing:**
+   - The CI pipeline runs tests and builds on every push to main/develop
+   - The publish workflow automatically extracts the version from the git tag and updates package.json
+   - Publishing to NPM happens automatically when you push a version tag
    - No manual intervention required after creating the tag
 
 ### Version Tag Format
